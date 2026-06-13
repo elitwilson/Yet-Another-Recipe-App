@@ -1,6 +1,7 @@
 pub struct Config {
     pub host: String,
     pub port: u16,
+    pub database_url: String,
 }
 
 impl Config {
@@ -12,7 +13,13 @@ impl Config {
                 .unwrap_or_else(|_| panic!("YARA_PORT must be a valid port number, got: {val}")),
             Err(_) => 3000,
         };
-        Self { host, port }
+        let database_url = std::env::var("DATABASE_URL")
+            .unwrap_or_else(|_| "postgres://yara:yara@localhost:5432/yara".to_string());
+        Self {
+            host,
+            port,
+            database_url,
+        }
     }
 }
 
@@ -32,9 +39,11 @@ mod tests {
         let _guard = env_lock();
         std::env::remove_var("YARA_HOST");
         std::env::remove_var("YARA_PORT");
+        std::env::remove_var("DATABASE_URL");
         let config = Config::from_env();
         assert_eq!(config.host, "127.0.0.1");
         assert_eq!(config.port, 3000);
+        assert!(config.database_url.starts_with("postgres://"));
     }
 
     #[test]
