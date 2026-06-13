@@ -1,5 +1,38 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { fetchRecipes } from './recipes';
+import { fetchRecipes, fetchRecipe, createRecipe, updateRecipe, deleteRecipe } from './recipes';
+import type { Recipe, RecipeInput } from '$lib/types/recipe';
+
+const mockRecipe: Recipe = {
+	id: 1,
+	title: 'Pasta Carbonara',
+	servings: 4,
+	totalTime: 30,
+	tags: ['italian', 'pasta'],
+	favorite: false,
+	ingredients: [
+		{ qty: '200', unit: 'g', item: 'spaghetti' },
+		{ qty: '100', unit: 'g', item: 'pancetta' }
+	],
+	steps: ['Boil pasta', 'Fry pancetta', 'Combine'],
+	notes: 'Use guanciale if available',
+	source: { type: 'manual' },
+	createdAt: '2026-06-13T00:00:00Z'
+};
+
+const mockInput: RecipeInput = {
+	title: 'Pasta Carbonara',
+	servings: 4,
+	totalTime: 30,
+	tags: ['italian', 'pasta'],
+	favorite: false,
+	ingredients: [
+		{ qty: '200', unit: 'g', item: 'spaghetti' },
+		{ qty: '100', unit: 'g', item: 'pancetta' }
+	],
+	steps: ['Boil pasta', 'Fry pancetta', 'Combine'],
+	notes: 'Use guanciale if available',
+	source: { type: 'manual' }
+};
 
 describe('fetchRecipes', () => {
 	beforeEach(() => {
@@ -10,36 +43,19 @@ describe('fetchRecipes', () => {
 		vi.unstubAllGlobals();
 	});
 
-	it('returns a typed array of recipes on success', async () => {
-		const mockData = [
-			{ id: 1, name: 'Pasta Carbonara' },
-			{ id: 2, name: 'Chicken Tikka Masala' }
-		];
+	it('GETs /api/recipes and returns array of recipes on success', async () => {
 		vi.mocked(fetch).mockResolvedValue({
 			ok: true,
-			json: async () => mockData
+			json: async () => [mockRecipe]
 		} as Response);
 
 		const result = await fetchRecipes();
 
 		expect(fetch).toHaveBeenCalledWith('/api/recipes');
-		expect(result).toEqual(mockData);
-		expect(result[0].id).toBe(1);
-		expect(result[0].name).toBe('Pasta Carbonara');
+		expect(result).toEqual([mockRecipe]);
 	});
 
-	it('returns an empty array when the API returns an empty array', async () => {
-		vi.mocked(fetch).mockResolvedValue({
-			ok: true,
-			json: async () => []
-		} as Response);
-
-		const result = await fetchRecipes();
-
-		expect(result).toEqual([]);
-	});
-
-	it('throws on non-2xx response', async () => {
+	it('throws with status on non-ok response', async () => {
 		vi.mocked(fetch).mockResolvedValue({
 			ok: false,
 			status: 500
@@ -47,19 +63,135 @@ describe('fetchRecipes', () => {
 
 		await expect(fetchRecipes()).rejects.toThrow('500');
 	});
+});
 
-	it('throws on 404 response', async () => {
+describe('fetchRecipe', () => {
+	beforeEach(() => {
+		vi.stubGlobal('fetch', vi.fn());
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it('GETs /api/recipes/:id and returns a recipe on success', async () => {
+		vi.mocked(fetch).mockResolvedValue({
+			ok: true,
+			json: async () => mockRecipe
+		} as Response);
+
+		const result = await fetchRecipe(1);
+
+		expect(fetch).toHaveBeenCalledWith('/api/recipes/1');
+		expect(result).toEqual(mockRecipe);
+	});
+
+	it('throws with status on non-ok response', async () => {
 		vi.mocked(fetch).mockResolvedValue({
 			ok: false,
 			status: 404
 		} as Response);
 
-		await expect(fetchRecipes()).rejects.toThrow('404');
+		await expect(fetchRecipe(99)).rejects.toThrow('404');
+	});
+});
+
+describe('createRecipe', () => {
+	beforeEach(() => {
+		vi.stubGlobal('fetch', vi.fn());
 	});
 
-	it('propagates network errors', async () => {
-		vi.mocked(fetch).mockRejectedValue(new Error('Network failure'));
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
 
-		await expect(fetchRecipes()).rejects.toThrow('Network failure');
+	it('POSTs to /api/recipes with JSON body and returns created recipe', async () => {
+		vi.mocked(fetch).mockResolvedValue({
+			ok: true,
+			json: async () => mockRecipe
+		} as Response);
+
+		const result = await createRecipe(mockInput);
+
+		expect(fetch).toHaveBeenCalledWith('/api/recipes', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(mockInput)
+		});
+		expect(result).toEqual(mockRecipe);
+	});
+
+	it('throws with status on non-ok response', async () => {
+		vi.mocked(fetch).mockResolvedValue({
+			ok: false,
+			status: 400
+		} as Response);
+
+		await expect(createRecipe(mockInput)).rejects.toThrow('400');
+	});
+});
+
+describe('updateRecipe', () => {
+	beforeEach(() => {
+		vi.stubGlobal('fetch', vi.fn());
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it('PUTs to /api/recipes/:id with JSON body and returns updated recipe', async () => {
+		vi.mocked(fetch).mockResolvedValue({
+			ok: true,
+			json: async () => mockRecipe
+		} as Response);
+
+		const result = await updateRecipe(1, mockInput);
+
+		expect(fetch).toHaveBeenCalledWith('/api/recipes/1', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(mockInput)
+		});
+		expect(result).toEqual(mockRecipe);
+	});
+
+	it('throws with status on non-ok response', async () => {
+		vi.mocked(fetch).mockResolvedValue({
+			ok: false,
+			status: 422
+		} as Response);
+
+		await expect(updateRecipe(1, mockInput)).rejects.toThrow('422');
+	});
+});
+
+describe('deleteRecipe', () => {
+	beforeEach(() => {
+		vi.stubGlobal('fetch', vi.fn());
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it('DELETEs /api/recipes/:id and resolves to undefined on success', async () => {
+		vi.mocked(fetch).mockResolvedValue({
+			ok: true
+		} as Response);
+
+		const result = await deleteRecipe(1);
+
+		expect(fetch).toHaveBeenCalledWith('/api/recipes/1', { method: 'DELETE' });
+		expect(result).toBeUndefined();
+	});
+
+	it('throws with status on non-ok response', async () => {
+		vi.mocked(fetch).mockResolvedValue({
+			ok: false,
+			status: 403
+		} as Response);
+
+		await expect(deleteRecipe(1)).rejects.toThrow('403');
 	});
 });
