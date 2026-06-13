@@ -20,7 +20,7 @@ const mockRecipe: Recipe = {
 		{ qty: '3', unit: '', item: 'chipotle peppers' }
 	],
 	steps: ['Marinate pork', 'Grill'],
-	notes: '',
+	notes: [],
 	source: { type: 'manual' }
 };
 

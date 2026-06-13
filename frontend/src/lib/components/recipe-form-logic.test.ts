@@ -20,7 +20,7 @@ const blankDraft = (): EditableRecipe => ({
 	favorite: false,
 	ingredients: [],
 	steps: [],
-	notes: '',
+	notes: [],
 	source: { type: 'manual' },
 });
 

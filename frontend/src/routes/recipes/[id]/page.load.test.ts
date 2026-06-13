@@ -24,7 +24,7 @@ const mockRecipe = {
 	favorite: false,
 	ingredients: [],
 	steps: [],
-	notes: '',
+	notes: [],
 	source: { type: 'manual' as const },
 	createdAt: '2026-06-13T00:00:00Z'
 };

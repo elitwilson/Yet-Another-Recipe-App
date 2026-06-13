@@ -24,7 +24,7 @@ const mockRecipe = {
 	favorite: false,
 	ingredients: [{ qty: '200g', unit: '', item: 'pasta' }],
 	steps: ['Boil water', 'Cook pasta'],
-	notes: 'Season well',
+	notes: ['Season well'],
 	source: { type: 'manual' as const },
 	createdAt: '2026-06-13T00:00:00Z'
 };

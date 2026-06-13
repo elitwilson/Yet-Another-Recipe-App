@@ -5,7 +5,7 @@ import type { Recipe } from '$lib/types/recipe';
 const base: Omit<Recipe, 'id' | 'title' | 'totalTime' | 'tags' | 'favorite' | 'createdAt' | 'ingredients'> = {
 	servings: 2,
 	steps: [],
-	notes: '',
+	notes: [],
 	source: { type: 'manual' }
 };
 

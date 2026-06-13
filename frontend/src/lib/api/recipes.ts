@@ -1,11 +1,63 @@
-import type { Recipe, RecipeInput } from '$lib/types/recipe';
+import type { Recipe, RecipeInput, Ingredient, RecipeSource } from '$lib/types/recipe';
+
+// Wire format — mirrors the backend's serde output exactly (snake_case).
+// The backend is the source of truth for this shape; everything past this
+// module speaks the camelCase domain model. Translation lives here only.
+interface RecipeWire {
+	id: number;
+	title: string;
+	servings: number | null;
+	total_time: number | null;
+	tags: string[];
+	favorite: boolean;
+	ingredients: Ingredient[];
+	steps: string[];
+	notes: string[];
+	source: RecipeSource;
+	created_at: string;
+}
+
+type RecipeInputWire = Omit<RecipeWire, 'id' | 'created_at'>;
+
+// Backend models servings/total_time as nullable; the frontend uses 0 as the
+// "absent" sentinel (see filterAndSortRecipes and RecipeForm).
+function recipeFromWire(w: RecipeWire): Recipe {
+	return {
+		id: w.id,
+		title: w.title,
+		servings: w.servings ?? 0,
+		totalTime: w.total_time ?? 0,
+		tags: w.tags,
+		favorite: w.favorite,
+		ingredients: w.ingredients,
+		steps: w.steps,
+		notes: w.notes,
+		source: w.source,
+		createdAt: w.created_at
+	};
+}
+
+function recipeToWire(input: RecipeInput): RecipeInputWire {
+	return {
+		title: input.title,
+		servings: input.servings,
+		total_time: input.totalTime,
+		tags: input.tags,
+		favorite: input.favorite,
+		ingredients: input.ingredients,
+		steps: input.steps,
+		notes: input.notes,
+		source: input.source
+	};
+}
 
 export async function fetchRecipes(): Promise<Recipe[]> {
 	const response = await fetch('/api/recipes');
 	if (!response.ok) {
 		throw new Error(`Failed to fetch recipes: ${response.status}`);
 	}
-	return response.json() as Promise<Recipe[]>;
+	const wire = (await response.json()) as RecipeWire[];
+	return wire.map(recipeFromWire);
 }
 
 export async function fetchRecipe(id: number): Promise<Recipe> {
@@ -13,31 +65,31 @@ export async function fetchRecipe(id: number): Promise<Recipe> {
 	if (!response.ok) {
 		throw new Error(`Failed to fetch recipe: ${response.status}`);
 	}
-	return response.json() as Promise<Recipe>;
+	return recipeFromWire((await response.json()) as RecipeWire);
 }
 
 export async function createRecipe(data: RecipeInput): Promise<Recipe> {
 	const response = await fetch('/api/recipes', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(data)
+		body: JSON.stringify(recipeToWire(data))
 	});
 	if (!response.ok) {
 		throw new Error(`Failed to create recipe: ${response.status}`);
 	}
-	return response.json() as Promise<Recipe>;
+	return recipeFromWire((await response.json()) as RecipeWire);
 }
 
 export async function updateRecipe(id: number, data: RecipeInput): Promise<Recipe> {
 	const response = await fetch(`/api/recipes/${id}`, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(data)
+		body: JSON.stringify(recipeToWire(data))
 	});
 	if (!response.ok) {
 		throw new Error(`Failed to update recipe: ${response.status}`);
 	}
-	return response.json() as Promise<Recipe>;
+	return recipeFromWire((await response.json()) as RecipeWire);
 }
 
 export async function deleteRecipe(id: number): Promise<void> {

@@ -2,6 +2,28 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fetchRecipes, fetchRecipe, createRecipe, updateRecipe, deleteRecipe } from './recipes';
 import type { Recipe, RecipeInput } from '$lib/types/recipe';
 
+const ingredients = [
+	{ qty: '200', unit: 'g', item: 'spaghetti' },
+	{ qty: '100', unit: 'g', item: 'pancetta' }
+];
+const steps = ['Boil pasta', 'Fry pancetta', 'Combine'];
+
+// What the backend actually sends/accepts on the wire (snake_case, notes array).
+const wireRecipe = {
+	id: 1,
+	title: 'Pasta Carbonara',
+	servings: 4,
+	total_time: 30,
+	tags: ['italian', 'pasta'],
+	favorite: false,
+	ingredients,
+	steps,
+	notes: ['Use guanciale if available'],
+	source: { type: 'manual' },
+	created_at: '2026-06-13T00:00:00Z'
+};
+
+// The camelCase domain object the client should return after mapping.
 const mockRecipe: Recipe = {
 	id: 1,
 	title: 'Pasta Carbonara',
@@ -9,12 +31,9 @@ const mockRecipe: Recipe = {
 	totalTime: 30,
 	tags: ['italian', 'pasta'],
 	favorite: false,
-	ingredients: [
-		{ qty: '200', unit: 'g', item: 'spaghetti' },
-		{ qty: '100', unit: 'g', item: 'pancetta' }
-	],
-	steps: ['Boil pasta', 'Fry pancetta', 'Combine'],
-	notes: 'Use guanciale if available',
+	ingredients,
+	steps,
+	notes: ['Use guanciale if available'],
 	source: { type: 'manual' },
 	createdAt: '2026-06-13T00:00:00Z'
 };
@@ -25,12 +44,22 @@ const mockInput: RecipeInput = {
 	totalTime: 30,
 	tags: ['italian', 'pasta'],
 	favorite: false,
-	ingredients: [
-		{ qty: '200', unit: 'g', item: 'spaghetti' },
-		{ qty: '100', unit: 'g', item: 'pancetta' }
-	],
-	steps: ['Boil pasta', 'Fry pancetta', 'Combine'],
-	notes: 'Use guanciale if available',
+	ingredients,
+	steps,
+	notes: ['Use guanciale if available'],
+	source: { type: 'manual' }
+};
+
+// The snake_case body the client should send for mockInput.
+const wireInput = {
+	title: 'Pasta Carbonara',
+	servings: 4,
+	total_time: 30,
+	tags: ['italian', 'pasta'],
+	favorite: false,
+	ingredients,
+	steps,
+	notes: ['Use guanciale if available'],
 	source: { type: 'manual' }
 };
 
@@ -46,7 +75,7 @@ describe('fetchRecipes', () => {
 	it('GETs /api/recipes and returns array of recipes on success', async () => {
 		vi.mocked(fetch).mockResolvedValue({
 			ok: true,
-			json: async () => [mockRecipe]
+			json: async () => [wireRecipe]
 		} as Response);
 
 		const result = await fetchRecipes();
@@ -77,7 +106,7 @@ describe('fetchRecipe', () => {
 	it('GETs /api/recipes/:id and returns a recipe on success', async () => {
 		vi.mocked(fetch).mockResolvedValue({
 			ok: true,
-			json: async () => mockRecipe
+			json: async () => wireRecipe
 		} as Response);
 
 		const result = await fetchRecipe(1);
@@ -108,7 +137,7 @@ describe('createRecipe', () => {
 	it('POSTs to /api/recipes with JSON body and returns created recipe', async () => {
 		vi.mocked(fetch).mockResolvedValue({
 			ok: true,
-			json: async () => mockRecipe
+			json: async () => wireRecipe
 		} as Response);
 
 		const result = await createRecipe(mockInput);
@@ -116,7 +145,7 @@ describe('createRecipe', () => {
 		expect(fetch).toHaveBeenCalledWith('/api/recipes', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(mockInput)
+			body: JSON.stringify(wireInput)
 		});
 		expect(result).toEqual(mockRecipe);
 	});
@@ -143,7 +172,7 @@ describe('updateRecipe', () => {
 	it('PUTs to /api/recipes/:id with JSON body and returns updated recipe', async () => {
 		vi.mocked(fetch).mockResolvedValue({
 			ok: true,
-			json: async () => mockRecipe
+			json: async () => wireRecipe
 		} as Response);
 
 		const result = await updateRecipe(1, mockInput);
@@ -151,7 +180,7 @@ describe('updateRecipe', () => {
 		expect(fetch).toHaveBeenCalledWith('/api/recipes/1', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(mockInput)
+			body: JSON.stringify(wireInput)
 		});
 		expect(result).toEqual(mockRecipe);
 	});

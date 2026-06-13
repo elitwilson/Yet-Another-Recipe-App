@@ -20,7 +20,7 @@ export interface Recipe {
 	favorite: boolean;
 	ingredients: Ingredient[];
 	steps: string[];
-	notes: string;
+	notes: string[];
 	source: RecipeSource;
 	createdAt: string;
 }

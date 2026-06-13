@@ -104,10 +104,14 @@
 			</section>
 		{/if}
 
-		{#if recipe.notes}
+		{#if recipe.notes.length > 0}
 			<section>
 				<h2 class="mb-2 text-lg font-semibold">Notes</h2>
-				<p class="text-muted-foreground">{recipe.notes}</p>
+				<ul class="text-muted-foreground flex list-disc flex-col gap-1 pl-5">
+					{#each recipe.notes as note}
+						<li>{note}</li>
+					{/each}
+				</ul>
 			</section>
 		{/if}
 	</main>
