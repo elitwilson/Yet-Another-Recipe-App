@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            id,\n            title,\n            servings,\n            total_time,\n            tags,\n            favorite,\n            ingredients as \"ingredients: sqlx::types::Json<Vec<Ingredient>>\",\n            steps,\n            notes,\n            source as \"source: sqlx::types::Json<RecipeSource>\",\n            created_at\n        FROM recipes\n        WHERE id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "servings",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "total_time",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "tags",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 5,
+        "name": "favorite",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "ingredients: sqlx::types::Json<Vec<Ingredient>>",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "steps",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 8,
+        "name": "notes",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 9,
+        "name": "source: sqlx::types::Json<RecipeSource>",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 10,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "cb987c07bfe91502abacc408ef488e282611aa509c63c6792648e727be0d0c83"
+}
