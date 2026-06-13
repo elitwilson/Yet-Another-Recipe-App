@@ -18,15 +18,15 @@ fn migrations_directory_exists() {
 }
 
 #[test]
-fn at_least_two_migration_files_exist() {
+fn at_least_five_migration_files_exist() {
     let entries: Vec<_> = fs::read_dir(migrations_dir())
         .expect("migrations dir must be readable")
         .filter_map(|e| e.ok())
         .filter(|e| e.path().extension().map(|x| x == "sql").unwrap_or(false))
         .collect();
     assert!(
-        entries.len() >= 2,
-        "expected at least 2 migration files (schema + seed), found {}",
+        entries.len() >= 5,
+        "expected at least 5 migration files (drop, create, seed x2, plus new drop/create/seed), found {}",
         entries.len()
     );
 }
@@ -56,15 +56,26 @@ fn schema_migration_has_id_column() {
 }
 
 #[test]
-fn schema_migration_has_name_column() {
-    let schema_file = find_migration_containing("CREATE TABLE")
-        .expect("a migration file must contain CREATE TABLE");
+fn schema_migration_has_title_column() {
+    let schema_file = find_migration_by_name("000003_create_recipes")
+        .expect("20240101000003_create_recipes.sql must exist");
     let content = fs::read_to_string(&schema_file).expect("schema migration must be readable");
     let lower = content.to_lowercase();
     assert!(
-        lower.contains("name") && lower.contains("text"),
-        "schema migration must define a 'name TEXT' column"
+        lower.contains("title") && lower.contains("text"),
+        "production schema migration must define a 'title TEXT' column, got: {lower}"
     );
+}
+
+#[test]
+fn production_schema_migration_has_required_columns() {
+    let schema_file = find_migration_by_name("000003_create_recipes")
+        .expect("20240101000003_create_recipes.sql must exist");
+    let content = fs::read_to_string(&schema_file).expect("schema migration must be readable");
+    let lower = content.to_lowercase();
+    for col in &["title", "servings", "total_time", "tags", "favorite", "ingredients", "steps", "notes", "source", "created_at"] {
+        assert!(lower.contains(col), "production schema must define '{}' column", col);
+    }
 }
 
 #[test]
@@ -93,13 +104,31 @@ fn seed_migration_is_idempotent() {
 
 fn find_migration_containing(pattern: &str) -> Option<std::path::PathBuf> {
     let lower_pattern = pattern.to_lowercase();
+    let mut entries: Vec<_> = fs::read_dir(migrations_dir())
+        .ok()?
+        .filter_map(|e| e.ok())
+        .filter(|e| e.path().extension().map(|x| x == "sql").unwrap_or(false))
+        .collect();
+    entries.sort_by_key(|e| e.path());
+    entries.into_iter()
+        .find(|e| {
+            fs::read_to_string(e.path())
+                .map(|c| c.to_lowercase().contains(&lower_pattern))
+                .unwrap_or(false)
+        })
+        .map(|e| e.path())
+}
+
+fn find_migration_by_name(name_fragment: &str) -> Option<std::path::PathBuf> {
     fs::read_dir(migrations_dir())
         .ok()?
         .filter_map(|e| e.ok())
         .filter(|e| e.path().extension().map(|x| x == "sql").unwrap_or(false))
         .find(|e| {
-            fs::read_to_string(e.path())
-                .map(|c| c.to_lowercase().contains(&lower_pattern))
+            e.path()
+                .file_name()
+                .and_then(|n| n.to_str())
+                .map(|n| n.contains(name_fragment))
                 .unwrap_or(false)
         })
         .map(|e| e.path())
