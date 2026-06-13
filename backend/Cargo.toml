@@ -1,0 +1,23 @@
+[package]
+name = "yara-backend"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "yara_backend"
+path = "src/lib.rs"
+
+[[bin]]
+name = "yara-backend"
+path = "src/main.rs"
+
+[dependencies]
+axum = "0.7"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net"] }
+
+[dev-dependencies]
+axum = { version = "0.7", features = ["macros"] }
+tower = { version = "0.4", features = ["util"] }
+http-body-util = "0.1"
+hyper = { version = "1", features = ["http1"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net"] }
