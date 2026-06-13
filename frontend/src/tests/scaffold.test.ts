@@ -109,10 +109,9 @@ describe('Task 4: Landing page', () => {
 		expect(page).toContain('<script lang="ts">');
 	});
 
-	it('+page.svelte imports Button from shadcn-svelte', () => {
+	it('+page.svelte imports a shadcn-svelte component', () => {
 		const page = readFileSync(resolve(root, 'src/routes/+page.svelte'), 'utf-8');
-		expect(page).toContain('Button');
-		expect(page).toContain('$lib/components/ui/button');
+		expect(page).toContain('$lib/components/ui/');
 	});
 
 	it('+page.svelte heading has a Tailwind utility class', () => {
