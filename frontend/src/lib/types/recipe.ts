@@ -26,3 +26,11 @@ export interface Recipe {
 }
 
 export type RecipeInput = Omit<Recipe, 'id' | 'createdAt'>;
+
+export interface EditableIngredient extends Ingredient {
+	lowConf?: boolean;
+}
+
+export type EditableRecipe = Omit<RecipeInput, 'ingredients'> & {
+	ingredients: EditableIngredient[];
+};
