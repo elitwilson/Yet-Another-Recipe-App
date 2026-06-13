@@ -17,6 +17,19 @@ pub struct RecipeSource {
     pub method: Option<String>,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct RecipeInput {
+    pub title: String,
+    pub servings: Option<i32>,
+    pub total_time: Option<i32>,
+    pub tags: Vec<String>,
+    pub favorite: bool,
+    pub ingredients: Vec<Ingredient>,
+    pub steps: Vec<String>,
+    pub notes: Vec<String>,
+    pub source: RecipeSource,
+}
+
 #[derive(Debug, Serialize)]
 pub struct Recipe {
     pub id: i32,
