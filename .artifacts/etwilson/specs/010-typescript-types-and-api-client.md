@@ -12,13 +12,17 @@ scope_files:
 
 # Feature: TypeScript types & API client
 
+> **Correction (post-execution, 2026-06-13):** Two decisions below were wrong and have been superseded in code:
+> 1. **`notes` is `string[]`, not `string`** — it backs a `TEXT[]` column / `Vec<String>` model and a bulleted-list UI (per the design prototype). Corrected inline below.
+> 2. **The bare `response.json() as Promise<T>` cast was replaced by a mapping layer.** The backend serializes snake_case (`total_time`, `created_at`) and `notes` as an array; casting the wire shape straight to the camelCase domain type silently produced `undefined` fields (crashing the library sort). `recipes.ts` now defines wire DTOs + `from/toWire` mappers at the boundary. See fix commit `ba94983`.
+
 ## Summary
 Defines the canonical frontend TypeScript interfaces (`Recipe`, `Ingredient`, `RecipeSource`, `RecipeInput`) matching the EPIC-002 production recipe schema, and the complete set of typed `fetch`-based API client functions (`fetchRecipes`, `fetchRecipe`, `createRecipe`, `updateRecipe`, `deleteRecipe`) covering all five recipe endpoints. This is the shared foundation every frontend recipe feature (library view, detail view, editor, edit/delete flows) builds on. It replaces the throwaway `Recipe { id, name }` interface and the single `fetchRecipes` function with the real, fully-typed surface.
 
 ---
 
 ## Requirements
-- `Recipe` interface exposes all production fields: `id: number`, `title: string`, `servings: number`, `totalTime: number`, `tags: string[]`, `favorite: boolean`, `ingredients: Ingredient[]`, `steps: string[]`, `notes: string`, `source: RecipeSource`, `createdAt: string`.
+- `Recipe` interface exposes all production fields: `id: number`, `title: string`, `servings: number`, `totalTime: number`, `tags: string[]`, `favorite: boolean`, `ingredients: Ingredient[]`, `steps: string[]`, `notes: string[]`, `source: RecipeSource`, `createdAt: string`.
 - `Ingredient` interface has exactly `qty: string`, `unit: string`, `item: string`. (`qty` is a free-form string, never a number.)
 - `RecipeSource` interface has `type: 'url' | 'paste' | 'manual'` plus optional `host?: string`, `url?: string`, `method?: string`.
 - `RecipeInput` is the create/update payload type: every `Recipe` field except `id` and `createdAt`.
@@ -75,7 +79,7 @@ Defines the canonical frontend TypeScript interfaces (`Recipe`, `Ingredient`, `R
     favorite: boolean;
     ingredients: Ingredient[];
     steps: string[];
-    notes: string;
+    notes: string[];
     source: RecipeSource;
     createdAt: string;
   }
