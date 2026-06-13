@@ -54,6 +54,12 @@ Implement the client-side `parseRecipeText` TypeScript module and the paste-text
 
 ---
 
+## Cleanup from EPIC-002
+
+- **Fix nullable `servings`/`totalTime` in form and types.** The EPIC-002 editor form used `0` as a sentinel for "unset" rather than `null`, because the `RecipeInput` type didn't cleanly support nullable number fields. This means a recipe with no servings saves as `0` instead of blank — a bug that becomes visible the moment the parser returns a recipe with missing servings/totalTime (common). The stories decomposition should include a cleanup story to: (1) update `Recipe`/`RecipeInput` types to use `number | null` for these fields, (2) update the form component to write `null` when the inputs are empty, (3) verify the backend round-trips `null` correctly (schema columns are already nullable). This story has no new UI and is a prerequisite to the parser returning correct drafts.
+
+---
+
 ## Key Decisions
 
 - **Parser is client-side TypeScript.** Enables instant feedback in freeform mode (EPIC-004), works offline, no API round trip. The parser logic has no I/O and is a clean port from the reference implementation in `.artifacts/etwilson/design/prototype/data.js` — port the algorithm, not the JSX scaffolding. If a mobile client is ever built, the parser can be re-exposed via API at that point; don't build for that now.
