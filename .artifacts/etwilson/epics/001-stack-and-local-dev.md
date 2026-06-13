@@ -41,3 +41,4 @@ Stand up the foundational technical scaffold for YARA so feature work can begin 
 - **Repo structure: monorepo.** `frontend/` and `backend/` at root, orchestrated by a root `docker-compose.yml`; migrations live in `backend/migrations/`.
 - **Definition of done: working end-to-end vertical slice.** The finish line is the three layers talking to each other through a real (seeded) DB read rendered in the UI — not independently-runnable pieces. This validates the stack choices in practice before feature work begins.
 - **Local dev: Docker Compose.** Single `docker compose up` is the canonical way to run the full stack locally.
+
