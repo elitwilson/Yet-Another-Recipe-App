@@ -34,7 +34,7 @@
 			{#each recipes as recipe (recipe.id)}
 				<li>
 					<Card class="px-4 py-3">
-						<span class="font-medium">{recipe.name}</span>
+						<span class="font-medium">{recipe.title}</span>
 					</Card>
 				</li>
 			{/each}
