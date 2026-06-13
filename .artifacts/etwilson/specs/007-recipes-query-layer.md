@@ -1,7 +1,7 @@
 ---
 number: 007
 story:
-status: ready
+status: complete
 base_branch: main
 depends_on: []
 scope_files:
