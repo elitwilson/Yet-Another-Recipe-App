@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Build sqlx-cli in the builder stage — copied to runtime for the entrypoint
 # migration runner. Faster than cargo-installing in the runtime image and
 # avoids unreliable pre-built binary downloads from GitHub releases.
-RUN cargo install sqlx-cli --no-default-features --features rustls,postgres
+RUN cargo install sqlx-cli@0.8.3 --no-default-features --features native-tls,postgres
 
 # Pre-fetch dependencies (layer cache)
 COPY Cargo.toml Cargo.lock ./
