@@ -22,7 +22,7 @@ RUN mkdir src && echo 'fn main(){}' > src/main.rs && touch src/lib.rs && \
 COPY src ./src
 COPY .sqlx ./.sqlx
 ENV SQLX_OFFLINE=true
-RUN touch src/main.rs && cargo build --release --bin yara-backend
+RUN touch src/main.rs src/lib.rs && cargo build --release --bin yara-backend
 
 # ── Runtime stage ─────────────────────────────────────────────────────────────
 FROM debian:bookworm-slim AS runtime
