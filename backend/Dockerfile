@@ -3,10 +3,14 @@ FROM rust:1.87-slim AS builder
 
 WORKDIR /build
 
-# Install sqlx-cli for migration support in the entrypoint
 RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config libssl-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Build sqlx-cli in the builder stage — copied to runtime for the entrypoint
+# migration runner. Faster than cargo-installing in the runtime image and
+# avoids unreliable pre-built binary downloads from GitHub releases.
+RUN cargo install sqlx-cli --no-default-features --features rustls,postgres
 
 # Pre-fetch dependencies (layer cache)
 COPY Cargo.toml Cargo.lock ./
@@ -26,13 +30,11 @@ FROM debian:bookworm-slim AS runtime
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates libssl3 curl \
+    ca-certificates libssl3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install sqlx-cli for running migrations at startup
-RUN curl -L https://github.com/launchbadge/sqlx/releases/download/v0.8.6/sqlx-cli-v0.8.6-x86_64-unknown-linux-gnu.tar.gz \
-    | tar -xz -C /usr/local/bin sqlx \
-    && chmod +x /usr/local/bin/sqlx
+# Copy sqlx-cli built in the builder stage
+COPY --from=builder /usr/local/cargo/bin/sqlx /usr/local/bin/sqlx
 
 COPY --from=builder /build/target/release/yara-backend ./yara-backend
 COPY migrations ./migrations
