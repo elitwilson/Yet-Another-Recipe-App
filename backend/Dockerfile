@@ -14,7 +14,7 @@ RUN cargo install sqlx-cli@0.8.3 --no-default-features --features native-tls,pos
 
 # Pre-fetch dependencies (layer cache)
 COPY Cargo.toml Cargo.lock ./
-RUN mkdir src && echo 'fn main(){}' > src/main.rs && \
+RUN mkdir src && echo 'fn main(){}' > src/main.rs && touch src/lib.rs && \
     SQLX_OFFLINE=true cargo build --release --bin yara-backend && \
     rm -rf src
 
