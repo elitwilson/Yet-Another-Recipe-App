@@ -1,6 +1,7 @@
 use axum::{routing::get, Router};
 use sqlx::PgPool;
 
+use crate::recipes::handler::list_recipes;
 use crate::routes::health::health;
 
 #[derive(Clone)]
@@ -19,7 +20,13 @@ pub fn create_router() -> Router {
 }
 
 pub fn create_router_with_state(state: AppState) -> Router {
+    let api = Router::new().route("/recipes", get(list_recipes));
+
     Router::new()
         .route("/health", get(health))
+        .nest("/api", api)
         .with_state(state)
 }
+
+#[cfg(test)]
+mod tests;
