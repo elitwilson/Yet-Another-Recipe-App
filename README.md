@@ -4,20 +4,25 @@ A full-stack vertical slice: SvelteKit frontend, Axum/Rust backend, Postgres dat
 
 ## Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) with Compose (v2, bundled with Docker Desktop)
-- No other tools required for running the full stack
+Local dev runs Postgres in Docker and the backend + frontend natively on the host (compiled Rust is far faster to iterate on natively than inside the macOS Docker VM). You need:
+
+- [Docker](https://docs.docker.com/get-docker/) with Compose (v2) — for Postgres
+- Rust toolchain (`rustup`), plus `cargo install cargo-watch sqlx-cli`
+- Node.js 20+
 
 ## Running the full stack
 
 ```sh
-docker compose up
+cp .env.example .env   # first time only
+./dev.sh
 ```
 
-Open http://localhost:5173 in your browser. The page shows seeded recipes fetched from Postgres via the backend API.
+This starts Postgres (Docker), waits for it to be healthy, applies migrations, then runs the backend (`cargo watch`) and frontend (Vite) natively with hot reload.
 
-On first run Docker builds both images and applies database migrations automatically. Subsequent runs reuse the existing `postgres_data` volume — migrations are idempotent and re-apply safely.
+- Frontend → http://localhost:5173
+- Backend → http://localhost:3000
 
-To stop: `Ctrl-C`, or `docker compose down` to also remove containers (the volume is preserved).
+`Ctrl-C` stops the backend + frontend watchers. Postgres keeps running between sessions; `./dev.sh down` stops it (the `postgres_data` volume is preserved). Migrations are idempotent and re-apply safely on each start.
 
 ### Environment variables
 
@@ -74,6 +79,6 @@ cargo sqlx prepare   # regenerate .sqlx/ cache after schema changes
 - **Frontend:** SvelteKit with `adapter-static` (pure SPA, no SSR). Built output in `frontend/build/`.
 - **Backend:** Axum REST API at `/api/recipes`. Listens on `YARA_HOST:YARA_PORT` (default `127.0.0.1:3000`).
 - **Database:** Postgres 16. Schema + seed applied via sqlx migrations.
-- **Compose:** nginx serves the frontend SPA and reverse-proxies `/api` to the backend — single-origin, no CORS required. Mirrors the Vite dev proxy so behavior is identical in both modes.
+- **Prod images:** the production Dockerfiles build an nginx image that serves the frontend SPA and reverse-proxies `/api` to the backend — single-origin, no CORS required. This mirrors the Vite dev proxy so behavior is identical in both modes. (`docker-compose.yml` runs only Postgres, for local dev.)
 
 Deployment and hosting are out of scope for this project.
