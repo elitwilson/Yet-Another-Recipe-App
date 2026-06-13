@@ -1,11 +1,38 @@
 <script lang="ts">
 	import { navigating } from '$app/state';
+	import { goto } from '$app/navigation';
+	import { deleteRecipe } from '$lib/api/recipes';
 	import { Button } from '$lib/components/ui/button';
+	import {
+		Dialog,
+		DialogContent,
+		DialogHeader,
+		DialogTitle,
+		DialogDescription,
+		DialogFooter
+	} from '$lib/components/ui/dialog';
 	import { formatTime } from '$lib/utils/time';
 	import type { Recipe } from '$lib/types/recipe';
 
 	const { data }: { data: { recipe: Recipe } } = $props();
 	const recipe = $derived(data.recipe);
+
+	let confirmingDelete = $state(false);
+	let deleting = $state(false);
+	let error = $state<string | null>(null);
+
+	async function confirmDelete() {
+		deleting = true;
+		error = null;
+		try {
+			await deleteRecipe(recipe.id);
+			goto('/');
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to delete recipe';
+		} finally {
+			deleting = false;
+		}
+	}
 </script>
 
 {#if navigating}
@@ -17,10 +44,14 @@
 		<div class="flex items-center justify-between">
 			<a href="/" class="text-muted-foreground text-sm hover:underline">Back to library</a>
 			<div class="flex gap-2">
-				<Button variant="outline" disabled>Edit</Button>
-				<Button variant="destructive" disabled>Delete</Button>
+				<Button variant="outline" href="/recipes/{recipe.id}/edit">Edit</Button>
+				<Button variant="destructive" onclick={() => { confirmingDelete = true; }}>Delete</Button>
 			</div>
 		</div>
+
+		{#if error}
+			<p class="text-destructive text-sm">{error}</p>
+		{/if}
 
 		<h1 class="text-3xl font-bold">{recipe.title}</h1>
 
@@ -80,4 +111,23 @@
 			</section>
 		{/if}
 	</main>
+
+	<Dialog bind:open={confirmingDelete}>
+		<DialogContent>
+			<DialogHeader>
+				<DialogTitle>Delete recipe?</DialogTitle>
+				<DialogDescription>
+					This will permanently delete "{recipe.title}". This action cannot be undone.
+				</DialogDescription>
+			</DialogHeader>
+			<DialogFooter>
+				<Button variant="outline" onclick={() => { confirmingDelete = false; }} disabled={deleting}>
+					Cancel
+				</Button>
+				<Button variant="destructive" onclick={confirmDelete} disabled={deleting}>
+					{deleting ? 'Deleting…' : 'Delete recipe'}
+				</Button>
+			</DialogFooter>
+		</DialogContent>
+	</Dialog>
 {/if}
