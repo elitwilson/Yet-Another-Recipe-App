@@ -30,7 +30,10 @@ fn backend_dockerfile_exists() {
 fn backend_dockerfile_uses_multistage_build() {
     let content = fs::read_to_string(backend_dir().join("Dockerfile"))
         .expect("backend/Dockerfile must be readable");
-    let from_count = content.lines().filter(|l| l.trim_start().starts_with("FROM")).count();
+    let from_count = content
+        .lines()
+        .filter(|l| l.trim_start().starts_with("FROM"))
+        .count();
     assert!(
         from_count >= 2,
         "backend/Dockerfile must use a multi-stage build (at least 2 FROM statements), found {}",
@@ -138,7 +141,10 @@ fn frontend_dockerfile_exists() {
 fn frontend_dockerfile_uses_multistage_build() {
     let content = fs::read_to_string(frontend_dir().join("Dockerfile"))
         .expect("frontend/Dockerfile must be readable");
-    let from_count = content.lines().filter(|l| l.trim_start().starts_with("FROM")).count();
+    let from_count = content
+        .lines()
+        .filter(|l| l.trim_start().starts_with("FROM"))
+        .count();
     assert!(
         from_count >= 2,
         "frontend/Dockerfile must use a multi-stage build (Node build + nginx serve), found {}",
@@ -218,7 +224,8 @@ fn frontend_nginx_conf_has_spa_fallback() {
         .expect("frontend/nginx.conf must be readable");
     // SvelteKit adapter-static uses 200.html (not index.html) as the SPA fallback
     assert!(
-        content.contains("try_files") && (content.contains("index.html") || content.contains("200.html")),
+        content.contains("try_files")
+            && (content.contains("index.html") || content.contains("200.html")),
         "frontend/nginx.conf must include try_files SPA fallback (index.html or 200.html)"
     );
 }
@@ -311,7 +318,9 @@ fn compose_frontend_publishes_port() {
         .expect("docker-compose.yml must be readable");
     // The frontend service section should contain a ports mapping
     // We check the frontend section contains "ports:"
-    let frontend_idx = content.find("frontend:").expect("frontend service must exist");
+    let frontend_idx = content
+        .find("frontend:")
+        .expect("frontend service must exist");
     let after_frontend = &content[frontend_idx..];
     assert!(
         after_frontend.contains("ports:"),
@@ -341,8 +350,8 @@ fn root_readme_exists() {
 
 #[test]
 fn root_readme_documents_docker_compose_up() {
-    let content = fs::read_to_string(repo_root().join("README.md"))
-        .expect("README.md must be readable");
+    let content =
+        fs::read_to_string(repo_root().join("README.md")).expect("README.md must be readable");
     assert!(
         content.contains("docker compose up") || content.contains("docker-compose up"),
         "README.md must document the 'docker compose up' command"
@@ -351,19 +360,22 @@ fn root_readme_documents_docker_compose_up() {
 
 #[test]
 fn root_readme_documents_prerequisites() {
-    let content = fs::read_to_string(repo_root().join("README.md"))
-        .expect("README.md must be readable");
+    let content =
+        fs::read_to_string(repo_root().join("README.md")).expect("README.md must be readable");
     let lower = content.to_lowercase();
     assert!(
-        lower.contains("docker") && (lower.contains("prerequisite") || lower.contains("require") || lower.contains("install")),
+        lower.contains("docker")
+            && (lower.contains("prerequisite")
+                || lower.contains("require")
+                || lower.contains("install")),
         "README.md must document prerequisites (Docker)"
     );
 }
 
 #[test]
 fn root_readme_documents_dev_workflow() {
-    let content = fs::read_to_string(repo_root().join("README.md"))
-        .expect("README.md must be readable");
+    let content =
+        fs::read_to_string(repo_root().join("README.md")).expect("README.md must be readable");
     let lower = content.to_lowercase();
     assert!(
         (lower.contains("cargo") || lower.contains("npm run dev")),
@@ -373,8 +385,8 @@ fn root_readme_documents_dev_workflow() {
 
 #[test]
 fn root_readme_documents_where_to_open_browser() {
-    let content = fs::read_to_string(repo_root().join("README.md"))
-        .expect("README.md must be readable");
+    let content =
+        fs::read_to_string(repo_root().join("README.md")).expect("README.md must be readable");
     assert!(
         content.contains("localhost") || content.contains("http://"),
         "README.md must tell the user where to point their browser after docker compose up"

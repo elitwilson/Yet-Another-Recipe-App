@@ -73,8 +73,23 @@ fn production_schema_migration_has_required_columns() {
         .expect("20240101000003_create_recipes.sql must exist");
     let content = fs::read_to_string(&schema_file).expect("schema migration must be readable");
     let lower = content.to_lowercase();
-    for col in &["title", "servings", "total_time", "tags", "favorite", "ingredients", "steps", "notes", "source", "created_at"] {
-        assert!(lower.contains(col), "production schema must define '{}' column", col);
+    for col in &[
+        "title",
+        "servings",
+        "total_time",
+        "tags",
+        "favorite",
+        "ingredients",
+        "steps",
+        "notes",
+        "source",
+        "created_at",
+    ] {
+        assert!(
+            lower.contains(col),
+            "production schema must define '{}' column",
+            col
+        );
     }
 }
 
@@ -110,7 +125,8 @@ fn find_migration_containing(pattern: &str) -> Option<std::path::PathBuf> {
         .filter(|e| e.path().extension().map(|x| x == "sql").unwrap_or(false))
         .collect();
     entries.sort_by_key(|e| e.path());
-    entries.into_iter()
+    entries
+        .into_iter()
         .find(|e| {
             fs::read_to_string(e.path())
                 .map(|c| c.to_lowercase().contains(&lower_pattern))
