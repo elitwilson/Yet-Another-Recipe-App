@@ -33,11 +33,9 @@ fn at_least_two_migration_files_exist() {
 
 #[test]
 fn schema_migration_creates_recipes_table() {
-    let schema_file = find_migration_containing("CREATE TABLE").expect(
-        "a migration file must contain CREATE TABLE for the recipes table",
-    );
-    let content = fs::read_to_string(&schema_file)
-        .expect("schema migration must be readable");
+    let schema_file = find_migration_containing("CREATE TABLE")
+        .expect("a migration file must contain CREATE TABLE for the recipes table");
+    let content = fs::read_to_string(&schema_file).expect("schema migration must be readable");
     assert!(
         content.to_lowercase().contains("recipes"),
         "schema migration must create a 'recipes' table, found in: {:?}",
@@ -47,11 +45,9 @@ fn schema_migration_creates_recipes_table() {
 
 #[test]
 fn schema_migration_has_id_column() {
-    let schema_file = find_migration_containing("CREATE TABLE").expect(
-        "a migration file must contain CREATE TABLE",
-    );
-    let content = fs::read_to_string(&schema_file)
-        .expect("schema migration must be readable");
+    let schema_file = find_migration_containing("CREATE TABLE")
+        .expect("a migration file must contain CREATE TABLE");
+    let content = fs::read_to_string(&schema_file).expect("schema migration must be readable");
     let lower = content.to_lowercase();
     assert!(
         lower.contains("id"),
@@ -61,11 +57,9 @@ fn schema_migration_has_id_column() {
 
 #[test]
 fn schema_migration_has_name_column() {
-    let schema_file = find_migration_containing("CREATE TABLE").expect(
-        "a migration file must contain CREATE TABLE",
-    );
-    let content = fs::read_to_string(&schema_file)
-        .expect("schema migration must be readable");
+    let schema_file = find_migration_containing("CREATE TABLE")
+        .expect("a migration file must contain CREATE TABLE");
+    let content = fs::read_to_string(&schema_file).expect("schema migration must be readable");
     let lower = content.to_lowercase();
     assert!(
         lower.contains("name") && lower.contains("text"),
@@ -75,11 +69,9 @@ fn schema_migration_has_name_column() {
 
 #[test]
 fn seed_migration_inserts_recipes() {
-    let seed_file = find_migration_containing("INSERT INTO").expect(
-        "a migration file must contain INSERT INTO for seed data",
-    );
-    let content = fs::read_to_string(&seed_file)
-        .expect("seed migration must be readable");
+    let seed_file = find_migration_containing("INSERT INTO")
+        .expect("a migration file must contain INSERT INTO for seed data");
+    let content = fs::read_to_string(&seed_file).expect("seed migration must be readable");
     let lower = content.to_lowercase();
     assert!(
         lower.contains("recipes"),
@@ -89,11 +81,9 @@ fn seed_migration_inserts_recipes() {
 
 #[test]
 fn seed_migration_is_idempotent() {
-    let seed_file = find_migration_containing("INSERT INTO").expect(
-        "a seed migration must exist with INSERT INTO",
-    );
-    let content = fs::read_to_string(&seed_file)
-        .expect("seed migration must be readable");
+    let seed_file = find_migration_containing("INSERT INTO")
+        .expect("a seed migration must exist with INSERT INTO");
+    let content = fs::read_to_string(&seed_file).expect("seed migration must be readable");
     let lower = content.to_lowercase();
     assert!(
         lower.contains("on conflict"),
