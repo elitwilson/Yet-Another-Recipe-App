@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { EditableRecipe, EditableIngredient } from '$lib/types/recipe';
-	import { isRecipeValid } from './recipe-form-logic';
+	import { isRecipeValid, parseNumericInput } from './recipe-form-logic';
 	import TagInput from './TagInput.svelte';
 	import IngredientRows from './IngredientRows.svelte';
 	import StepRows from './StepRows.svelte';
@@ -49,7 +49,7 @@
 				placeholder="4"
 				oninput={(e) => {
 					const v = (e.target as HTMLInputElement).value;
-					set({ servings: v ? parseInt(v, 10) : 0 });
+					set({ servings: parseNumericInput(v) });
 				}}
 			/>
 		</div>
@@ -64,7 +64,7 @@
 				placeholder="25"
 				oninput={(e) => {
 					const v = (e.target as HTMLInputElement).value;
-					set({ totalTime: v ? parseInt(v, 10) : 0 });
+					set({ totalTime: parseNumericInput(v) });
 				}}
 			/>
 		</div>

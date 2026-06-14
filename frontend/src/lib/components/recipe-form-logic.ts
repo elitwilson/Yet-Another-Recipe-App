@@ -45,3 +45,8 @@ export function removeAt<T>(arr: T[], index: number): T[] {
 export function updateAt<T>(arr: T[], index: number, patch: Partial<T>): T[] {
 	return arr.map((item, i) => (i === index ? { ...item, ...patch } : item));
 }
+
+// Parses a numeric input field value; returns null when the field is empty/cleared.
+export function parseNumericInput(v: string): number | null {
+	return v.trim() ? parseInt(v, 10) : null;
+}

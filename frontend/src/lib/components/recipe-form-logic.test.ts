@@ -9,13 +9,14 @@ import {
 	removeAt,
 	updateAt,
 	addStep,
+	parseNumericInput,
 } from './recipe-form-logic';
 import type { EditableRecipe, EditableIngredient } from '$lib/types/recipe';
 
 const blankDraft = (): EditableRecipe => ({
 	title: '',
-	servings: 0,
-	totalTime: 0,
+	servings: null,
+	totalTime: null,
 	tags: [],
 	favorite: false,
 	ingredients: [],
@@ -224,5 +225,23 @@ describe('updateAt', () => {
 		const rows: EditableIngredient[] = [{ qty: '1', unit: 'cup', item: 'water' }];
 		updateAt(rows, 0, { qty: '99' });
 		expect(rows[0].qty).toBe('1');
+	});
+});
+
+describe('parseNumericInput', () => {
+	it('returns null for empty string (field cleared)', () => {
+		expect(parseNumericInput('')).toBeNull();
+	});
+
+	it('returns null for whitespace-only string', () => {
+		expect(parseNumericInput('  ')).toBeNull();
+	});
+
+	it('parses a valid integer string', () => {
+		expect(parseNumericInput('4')).toBe(4);
+	});
+
+	it('parses a multi-digit integer string', () => {
+		expect(parseNumericInput('30')).toBe(30);
 	});
 });
