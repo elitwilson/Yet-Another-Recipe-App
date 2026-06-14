@@ -199,6 +199,57 @@ async fn post_api_recipes_returns_201_with_created_recipe() {
     assert_eq!(recipe["servings"], 2);
 }
 
+#[tokio::test]
+async fn post_api_recipes_null_servings_and_total_time_round_trip() {
+    let body = json!({
+        "title": unique_title("Null Fields Recipe"),
+        "servings": null,
+        "total_time": null,
+        "tags": [],
+        "favorite": false,
+        "ingredients": [{"qty": "1", "unit": "cup", "item": "water"}],
+        "steps": ["Boil water."],
+        "notes": [],
+        "source": {"type": "manual", "host": null, "url": null, "method": null}
+    });
+
+    let app = app().await;
+
+    let create_resp = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/api/recipes")
+                .header("content-type", "application/json")
+                .body(axum::body::Body::from(body.to_string()))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(create_resp.status(), StatusCode::CREATED);
+    let body_bytes = create_resp.into_body().collect().await.unwrap().to_bytes();
+    let created: Value = serde_json::from_slice(&body_bytes).unwrap();
+    assert!(created["servings"].is_null(), "POST response must return null servings");
+    assert!(created["total_time"].is_null(), "POST response must return null total_time");
+
+    let id = created["id"].as_i64().unwrap();
+    let get_resp = app
+        .oneshot(
+            Request::builder()
+                .uri(format!("/api/recipes/{id}"))
+                .body(axum::body::Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(get_resp.status(), StatusCode::OK);
+    let body_bytes = get_resp.into_body().collect().await.unwrap().to_bytes();
+    let fetched: Value = serde_json::from_slice(&body_bytes).unwrap();
+    assert!(fetched["servings"].is_null(), "GET response must return null servings");
+    assert!(fetched["total_time"].is_null(), "GET response must return null total_time");
+}
+
 // --- PUT /api/recipes/:id ---
 
 #[tokio::test]
