@@ -34,3 +34,9 @@ export interface EditableIngredient extends Ingredient {
 export type EditableRecipe = Omit<RecipeInput, 'ingredients'> & {
 	ingredients: EditableIngredient[];
 };
+
+export type ParsedDraft = EditableRecipe & {
+	confidence: number | null;
+	warnings: string[];
+	source: RecipeSource;
+};
