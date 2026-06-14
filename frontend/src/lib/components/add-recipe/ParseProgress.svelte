@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { scheduleSteps } from './add-recipe-logic';
+
 	interface Props {
 		steps: string[];
 		onDone: () => void;
@@ -9,25 +11,14 @@
 	let current = $state(0);
 
 	$effect(() => {
-		const timers: ReturnType<typeof setTimeout>[] = [];
-
-		steps.forEach((_, i) => {
-			const t = setTimeout(
-				() => {
-					current = i;
-					if (i === steps.length - 1) {
-						const done = setTimeout(() => onDone(), 600);
-						timers.push(done);
-					}
-				},
-				i * 800
-			);
-			timers.push(t);
-		});
-
-		return () => {
-			timers.forEach((t) => clearTimeout(t));
-		};
+		const cleanup = scheduleSteps(
+			steps.length,
+			800,
+			600,
+			(i) => { current = i; },
+			onDone
+		);
+		return cleanup;
 	});
 </script>
 

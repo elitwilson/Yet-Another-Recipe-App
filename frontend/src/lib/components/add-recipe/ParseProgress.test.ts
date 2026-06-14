@@ -44,19 +44,20 @@ describe('ParseProgress — timer-driven advancement', () => {
 		expect(src).toMatch(/\$effect/);
 	});
 
-	it('uses setTimeout for step advancement', () => {
+	it('delegates to scheduleSteps from add-recipe-logic', () => {
 		const src = readFileSync(progressFile, 'utf-8');
-		expect(src).toMatch(/setTimeout/);
+		expect(src).toMatch(/scheduleSteps/);
+		expect(src).toMatch(/add-recipe-logic/);
 	});
 
-	it('calls onDone after the last step', () => {
+	it('passes onDone to scheduleSteps', () => {
 		const src = readFileSync(progressFile, 'utf-8');
 		expect(src).toMatch(/onDone/);
 	});
 
-	it('cleans up timers (clearTimeout)', () => {
+	it('returns the cleanup from scheduleSteps via $effect', () => {
 		const src = readFileSync(progressFile, 'utf-8');
-		expect(src).toMatch(/clearTimeout/);
+		expect(src).toMatch(/return\s+cleanup|return cleanup/);
 	});
 });
 

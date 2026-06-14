@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { countLines, pasteSource, draftFromParse } from './add-recipe-logic';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { countLines, pasteSource, draftFromParse, scheduleSteps } from './add-recipe-logic';
 import type { ParsedRecipeDraft } from '$lib/parser';
 
 describe('countLines', () => {
@@ -84,5 +84,68 @@ describe('draftFromParse', () => {
 	it('includes empty tags array by default', () => {
 		const draft = draftFromParse(minParsed);
 		expect(draft.tags).toEqual([]);
+	});
+});
+
+describe('scheduleSteps', () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	it('calls onStep for each step index in order', () => {
+		const onStep = vi.fn();
+		const onDone = vi.fn();
+		scheduleSteps(3, 100, 50, onStep, onDone);
+
+		vi.advanceTimersByTime(0);
+		expect(onStep).toHaveBeenCalledWith(0);
+
+		vi.advanceTimersByTime(100);
+		expect(onStep).toHaveBeenCalledWith(1);
+
+		vi.advanceTimersByTime(100);
+		expect(onStep).toHaveBeenCalledWith(2);
+
+		expect(onStep).toHaveBeenCalledTimes(3);
+	});
+
+	it('calls onDone after the final step plus finalDelay', () => {
+		const onDone = vi.fn();
+		scheduleSteps(3, 100, 50, vi.fn(), onDone);
+
+		// Advance through all step timers (0ms, 100ms, 200ms) plus finalDelay (50ms)
+		vi.advanceTimersByTime(250);
+		expect(onDone).toHaveBeenCalledTimes(1);
+	});
+
+	it('does not call onDone before the last step fires', () => {
+		const onDone = vi.fn();
+		scheduleSteps(3, 100, 50, vi.fn(), onDone);
+
+		// Only advance through first two steps — last step at 200ms not yet fired
+		vi.advanceTimersByTime(199);
+		expect(onDone).not.toHaveBeenCalled();
+	});
+
+	it('cleanup cancels pending timers so onDone never fires', () => {
+		const onDone = vi.fn();
+		const cleanup = scheduleSteps(3, 100, 50, vi.fn(), onDone);
+
+		// Cancel before last step fires
+		cleanup();
+		vi.advanceTimersByTime(1000);
+		expect(onDone).not.toHaveBeenCalled();
+	});
+
+	it('returns a no-op for 0 steps without throwing', () => {
+		const onDone = vi.fn();
+		const cleanup = scheduleSteps(0, 100, 50, vi.fn(), onDone);
+		vi.advanceTimersByTime(1000);
+		expect(onDone).not.toHaveBeenCalled();
+		expect(() => cleanup()).not.toThrow();
 	});
 });
