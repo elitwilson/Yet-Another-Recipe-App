@@ -1,7 +1,7 @@
 ---
 number: 016
 story: STR-015
-status: ready
+status: complete
 base_branch: main
 depends_on: [STR-014]
 scope_files:
