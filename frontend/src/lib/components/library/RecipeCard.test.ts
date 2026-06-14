@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { formatTotalTime } from '$lib/library/format';
+import { sourceMeta } from '$lib/components/review/source-meta';
 import type { Recipe } from '$lib/types/recipe';
 
 // Full Svelte component mounting requires a browser environment (jsdom/happy-dom).
@@ -47,11 +48,46 @@ describe('RecipeCard — expected data-test attributes', () => {
 			'data-test="recipe-title"',        // recipe title text
 			'data-test="recipe-time"',         // formatted total time
 			'data-test="recipe-tags"',         // tags container
-			'data-test="favorite-toggle"'      // favorite button (stops propagation)
+			'data-test="favorite-toggle"',     // favorite button (stops propagation)
+			'data-test="recipe-source"'        // source icon (icon-only, with accessible label)
 		];
 		// All selectors are defined — this test passes as a registry check
-		expect(selectors).toHaveLength(5);
+		expect(selectors).toHaveLength(6);
 		expect(selectors.every(s => s.startsWith('data-test='))).toBe(true);
+	});
+});
+
+describe('RecipeCard — source icon contract (via sourceMeta helper)', () => {
+	it('returns globe icon and a label for url source', () => {
+		const meta = sourceMeta({ type: 'url', host: 'example.com' });
+		expect(meta.icon).toBe('globe');
+		expect(typeof meta.label).toBe('string');
+		expect(meta.label.length).toBeGreaterThan(0);
+	});
+
+	it('returns clipboard icon and "Pasted text" label for paste source', () => {
+		const meta = sourceMeta({ type: 'paste' });
+		expect(meta.icon).toBe('clipboard');
+		expect(meta.label).toBe('Pasted text');
+	});
+
+	it('returns wand icon and a label for manual source', () => {
+		const meta = sourceMeta({ type: 'manual' });
+		expect(meta.icon).toBe('wand');
+		expect(typeof meta.label).toBe('string');
+		expect(meta.label.length).toBeGreaterThan(0);
+	});
+
+	it('manual and paste source render different icons', () => {
+		const manualMeta = sourceMeta({ type: 'manual' });
+		const pasteMeta = sourceMeta({ type: 'paste' });
+		expect(manualMeta.icon).not.toBe(pasteMeta.icon);
+	});
+
+	it('falls back to clipboard icon for unknown source type', () => {
+		// @ts-expect-error testing unknown type gracefully
+		const meta = sourceMeta({ type: 'unknown' });
+		expect(meta.icon).toBe('clipboard');
 	});
 });
 
