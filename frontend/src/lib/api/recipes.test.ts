@@ -63,6 +63,36 @@ const wireInput = {
 	source: { type: 'manual' }
 };
 
+// Wire fixture with null servings and total_time (e.g. parsed recipe with no stated time).
+const wireRecipeNullFields = {
+	id: 2,
+	title: 'Mystery Dish',
+	servings: null,
+	total_time: null,
+	tags: [],
+	favorite: false,
+	ingredients,
+	steps,
+	notes: [],
+	source: { type: 'manual' },
+	created_at: '2026-06-13T00:00:00Z'
+};
+
+// The domain object expected after null-safe mapping — both fields stay null.
+const mockRecipeNullFields: Recipe = {
+	id: 2,
+	title: 'Mystery Dish',
+	servings: null,
+	totalTime: null,
+	tags: [],
+	favorite: false,
+	ingredients,
+	steps,
+	notes: [],
+	source: { type: 'manual' },
+	createdAt: '2026-06-13T00:00:00Z'
+};
+
 describe('fetchRecipes', () => {
 	beforeEach(() => {
 		vi.stubGlobal('fetch', vi.fn());
@@ -82,6 +112,19 @@ describe('fetchRecipes', () => {
 
 		expect(fetch).toHaveBeenCalledWith('/api/recipes');
 		expect(result).toEqual([mockRecipe]);
+	});
+
+	it('maps null servings and total_time through unchanged (no ?? 0 coercion)', async () => {
+		vi.mocked(fetch).mockResolvedValue({
+			ok: true,
+			json: async () => [wireRecipeNullFields]
+		} as Response);
+
+		const result = await fetchRecipes();
+
+		expect(result[0].servings).toBeNull();
+		expect(result[0].totalTime).toBeNull();
+		expect(result[0]).toEqual(mockRecipeNullFields);
 	});
 
 	it('throws with status on non-ok response', async () => {
@@ -122,6 +165,18 @@ describe('fetchRecipe', () => {
 		} as Response);
 
 		await expect(fetchRecipe(99)).rejects.toThrow('404');
+	});
+
+	it('maps null servings and total_time through unchanged', async () => {
+		vi.mocked(fetch).mockResolvedValue({
+			ok: true,
+			json: async () => wireRecipeNullFields
+		} as Response);
+
+		const result = await fetchRecipe(2);
+
+		expect(result.servings).toBeNull();
+		expect(result.totalTime).toBeNull();
 	});
 });
 

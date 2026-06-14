@@ -19,14 +19,14 @@ interface RecipeWire {
 
 type RecipeInputWire = Omit<RecipeWire, 'id' | 'created_at'>;
 
-// Backend models servings/total_time as nullable; the frontend uses 0 as the
-// "absent" sentinel (see filterAndSortRecipes and RecipeForm).
+// Backend models servings/total_time as nullable; null passes through unchanged
+// so "unknown" stays distinct from any numeric value.
 function recipeFromWire(w: RecipeWire): Recipe {
 	return {
 		id: w.id,
 		title: w.title,
-		servings: w.servings ?? 0,
-		totalTime: w.total_time ?? 0,
+		servings: w.servings,
+		totalTime: w.total_time,
 		tags: w.tags,
 		favorite: w.favorite,
 		ingredients: w.ingredients,

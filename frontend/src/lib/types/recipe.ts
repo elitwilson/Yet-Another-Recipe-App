@@ -14,8 +14,8 @@ export interface RecipeSource {
 export interface Recipe {
 	id: number;
 	title: string;
-	servings: number;
-	totalTime: number;
+	servings: number | null;
+	totalTime: number | null;
 	tags: string[];
 	favorite: boolean;
 	ingredients: Ingredient[];
