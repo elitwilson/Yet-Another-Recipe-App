@@ -1,0 +1,35 @@
+// Unit dictionary for ingredient parsing.
+// Verbatim from the prototype's UNITS array.
+export const UNITS: string[] = [
+	'cups', 'cup', 'c',
+	'tablespoons', 'tablespoon', 'tbsp', 'tbs', 'tbl',
+	'teaspoons', 'teaspoon', 'tsp',
+	'grams', 'gram', 'g',
+	'kilograms', 'kilogram', 'kg',
+	'milliliters', 'milliliter', 'ml',
+	'liters', 'liter', 'l',
+	'ounces', 'ounce', 'oz',
+	'pounds', 'pound', 'lb', 'lbs',
+	'pinch', 'pinches',
+	'dash', 'dashes',
+	'cloves', 'clove',
+	'cans', 'can',
+	'sticks', 'stick',
+	'slices', 'slice',
+	'pieces', 'piece',
+	'bunch', 'bunches',
+	'sprigs', 'sprig',
+	'heads', 'head',
+	'handful', 'handfuls',
+	'packages', 'package', 'pkg',
+	'quarts', 'quart', 'qt',
+	'pints', 'pint', 'pt',
+	'gallons', 'gallon',
+	'fl',
+	'sheets', 'sheet',
+	'knob',
+	'strips', 'strip',
+	'wedges', 'wedge',
+];
+
+export const UNIT_RE = new RegExp('^(' + UNITS.join('|') + ')\\.?$', 'i');
