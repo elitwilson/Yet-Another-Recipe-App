@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import type { Recipe, RecipeInput } from '$lib/types/recipe';
 	import { formatTotalTime } from '$lib/library/format';
+	import { sourceMeta } from '$lib/components/review/source-meta';
 
 	let {
 		recipe,
@@ -22,6 +23,7 @@
 	}
 
 	const formattedTime = $derived(formatTotalTime(recipe.totalTime));
+	const sourceMd = $derived(sourceMeta(recipe.source));
 </script>
 
 <div
@@ -68,5 +70,30 @@
 				</svg>
 			{/if}
 		</button>
+	</div>
+
+	<!-- Source icon — icon only, muted, accessible label from shared sourceMeta helper -->
+	<div class="mt-2 flex items-center">
+		<span
+			data-test="recipe-source"
+			class="text-muted-foreground"
+			aria-label={sourceMd.label}
+			title={sourceMd.label}
+		>
+			{#if sourceMd.icon === 'globe'}
+				<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+				</svg>
+			{:else if sourceMd.icon === 'wand'}
+				<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="m15 5 4 4"/><path d="M13 7 8.7 2.7a2.41 2.41 0 0 0-3.4 3.4L9.6 10"/><path d="m9.6 10 2.17 2.17"/><path d="m19 5-1.4 1.4"/><path d="m14 10 1.4-1.4"/><path d="M10 13.9 4.9 19a2.41 2.41 0 0 0 3.4 3.4l5.1-5.1"/>
+				</svg>
+			{:else}
+				<!-- clipboard (paste / fallback) -->
+				<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+				</svg>
+			{/if}
+		</span>
 	</div>
 </div>
