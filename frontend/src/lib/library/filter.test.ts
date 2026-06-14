@@ -137,6 +137,23 @@ describe('filterAndSortRecipes', () => {
 			const result = filterAndSortRecipes(recipes, { query: '', sort: 'quickest', favoritesOnly: false });
 			expect(result[result.length - 1].id).toBe(3);
 		});
+
+		it('places a recipe with null totalTime after all timed recipes', () => {
+			const nullTimeRecipe: Recipe = {
+				...base,
+				id: 5,
+				title: 'Unknown Time Dish',
+				totalTime: null,
+				tags: [],
+				favorite: false,
+				createdAt: '2026-05-01T00:00:00Z',
+				ingredients: [{ qty: '1', unit: 'cup', item: 'mystery' }]
+			};
+			const withNull = [...recipes, nullTimeRecipe];
+			const result = filterAndSortRecipes(withNull, { query: '', sort: 'quickest', favoritesOnly: false });
+			// null totalTime must sort after all recipes that have a time value
+			expect(result[result.length - 1].id).toBe(5);
+		});
 	});
 
 	describe('favoritesOnly', () => {
