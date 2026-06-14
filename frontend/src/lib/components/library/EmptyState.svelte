@@ -10,6 +10,7 @@
 	{#if variant === 'empty-library'}
 		<p data-test="empty-library-message" class="text-lg font-medium">Your library is empty</p>
 		<p class="text-sm">Add your first recipe to get started.</p>
+		<a href="/recipes/new" class="btn btn-primary mt-2 text-sm">Add recipe</a>
 	{:else}
 		<p data-test="no-results-message" class="text-lg font-medium">No recipes match your search</p>
 		<p class="text-sm">Try adjusting your filters or search terms.</p>

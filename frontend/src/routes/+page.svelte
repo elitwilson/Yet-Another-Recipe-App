@@ -36,7 +36,10 @@
 </script>
 
 <main class="mx-auto max-w-5xl px-4 py-8">
-	<h1 class="mb-6 text-3xl font-bold">My Recipes</h1>
+	<div class="mb-6 flex items-center justify-between">
+		<h1 class="text-3xl font-bold">My Recipes</h1>
+		<a href="/recipes/new" class="btn btn-primary text-sm">Add recipe</a>
+	</div>
 
 	{#if loading}
 		<p data-test="loading-state" class="text-muted-foreground">Loading recipes...</p>
